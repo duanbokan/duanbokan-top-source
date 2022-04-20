@@ -1,0 +1,134 @@
+---
+
+title: EventBus简介及使用
+
+date: 2016-01-06 10:16:05
+
+tags: [Android , EventBus , 观察者模式]
+
+categories: Android
+
+keywords: EventBus , 观察者模式
+
+description: EventBus简介及使用
+
+top_img: http://image.jucaiwy.com/image/20160106/event_bus.png
+
+cover: http://image.jucaiwy.com/image/20160106/event_bus.png
+
+---
+
+EventBus是一个Android下典型的“订阅发布模式”框架，该模式定义了一种一对多的依赖关系，让多个订阅者对象同时监听一个主题对象，通过这种方式对订阅者和主题发布者进行充分解耦，主要用于Android组件间相互通信、线程间互相通信及其他线程与UI线程之间互相通信等。代替了传统的Handler、BroadCastReceiver、Interface回调等通信方式，相比之下EventBus的优点是代码简洁，使用简单，并将事件发布和订阅充分解耦。
+
+
+### 1. 项目地址
+
+EventBus开源项目的项目地址：[https://github.com/greenrobot/EventBus](https://github.com/greenrobot/EventBus)
+
+### 2. 相关概念
+
+#### 2.1 事件：
+我所理解的事件就是需要在订阅者和发布者之间进行传递的数据，可以为单个基本类型的值，也可以为一个自定义的对象。
+
+事件可以分为一般事件和Sticky事件，相对于一般事件，Sticky事件不同之处在于：当事件发布后，再有订阅者开始订阅该类型事件，依然能收到该类型事件最近一个sticky事件，与StickyBroadcast类似。
+
+事件可以在任意线程进行发布,EventBus会根据发布事件类型，调用相对应事件的处理函数进行处理。
+
+#### 2.2 订阅者：
+订阅者是订阅某种事件类型的对象，当发布者发布这类事件后，EventBus会执行订阅者中相对应的事件响应函数。
+
+普通事件订阅者通过register接口订阅某个事件类型，unregister接口退订。 
+Sticky事件的订阅者通过registerSticky接口订阅某个事件类型，通过unregister接口退订。
+
+订阅者存在优先级，优先级高的订阅者可以取消事件继续向优先级低的订阅者分发，默认所有订阅者优先级都为0。
+
+#### 2.3 发布者：
+发布事件的对象。
+
+对于普通事件，使用post接口发布事件
+
+对于Sticky事件，则使用postSticky接口发布事件
+
+### 3. 基本使用
+以自定义对象为事件进行距离介绍
+
+#### 3.1 自定义对象
+定义传递事件的对象Message
+
+    public class Message
+    {
+    	// 消息号
+    	private int messageCode;
+    
+    	// 消息内容
+    	private int messageInfo;
+    }
+#### 3.2 注册监听者
+注册当前对象为监听者
+
+	EventBus.getDefault().register(this);
+或者
+
+	EventBus.getDefault().register(EventBusMsgDeal.class);
+对于监听Sticky事件：
+
+	EventBus.getDefault().registerSticky(this);
+#### 3.3 发布事件
+发布事件时，分为两种事件进行发布 
+
+普通事件：
+
+	EventBus.getDefault().post(msg);
+Sticky事件：
+
+	EventBus.getDefault().postSticky(msg);
+#### 3.4 解除监听
+	EventBus.getDefault().unregister(this);
+
+这里特别需要注意这个东西，一般在Activity声明周期结束的时候，需要调用这个方法将监听解除，否则，不仅影响性能，还会出现很多问题
+
+#### 3.5 事件处理
+
+对于事件处理，可以按照普通事件和Sticky事件进行区分，对于普通事件，可以分为以下四种处理方式：
+
+##### 3.5.1 OnEvent():
+
+使用OnEvent作为订阅处理函数，则表示发布事件和接受处理事件将会在同一个线程中执行，因此在该方法中，不宜执行一些耗时的操作，否则会造成阻塞、延迟。
+
+##### 3.5.2 onEventMainThread():
+
+使用onEventMainThread作为订阅处理函数，表示事件无论是在哪一个线程中发布出来的，都会在UI线程中执行，意味着可以再该线程中更新UI，因此在该线程中同样不适宜执行一些比较耗时的操作，否则会造成UI线程阻塞，进而导致NAR。
+
+##### 3.5.3 onEventBackgroundThread():
+
+使用onEventBackgroundThread作为订阅处理函数，恰好与onEventMainThread相反，onEventMainThread是无论在哪一个线程中发送事件，都会在UI线程中执行。而onEventBackgroundThread意味着，无论在哪一个线程中发送事件，都会在子线程中执行，也就是说，若当前Post线程为UI线程，则处理函数会在子线程中执行，若当前Post线程为子线程，则直接在该线程中执行。
+
+##### 3.5.4 onEventAsync():
+
+使用onEventAsync作为订阅处理函数，意味着，无论当前在哪一个线程中Post事件出来，都会新起一个线程进行执行。
+
+
+### 4. 执行顺序
+
+写到这里，可能有同学会迷惑，这四个方法如果同时出现在同一个类中，执行的先后顺序应该是什么样子的，这里我做了一个测试，得到其调用顺序如下：
+
+	1. onEvent();
+	2. onEventMainThread();
+	3. onEventAsync();
+	4. onEventBackgroundThread();
+
+### 5. 结束
+
+至此，已经大致学会了使用EventBus的使用，如果需要学习更多关于EventBus的源码解析及设计思想，可以参考以下链接：
+
+源码解析：[http://www.codekk.com/](http://www.codekk.com/)
+
+设计思想：[http://www.cnblogs.com/MartinChen999/archive/2011/12/21/2294034.html](http://www.cnblogs.com/MartinChen999/archive/2011/12/21/2294034.html)
+
+同样和EventBus具有相似功能的还有：Otto
+
+项目地址：[https://github.com/square/otto](https://github.com/square/otto)
+
+主页：[http://square.github.io/otto/](http://square.github.io/otto/)
+
+

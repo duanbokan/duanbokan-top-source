@@ -1,0 +1,176 @@
+---
+
+title: 单节点配置FastDFS
+
+date: 2015-01-12 14:54:46
+
+tags: [FastDFS,Linux,数据存储]
+
+categories: FastDFS
+
+keywords: FastDFS,Linux,数据存储
+
+description: 单节点配置FastDFS
+
+top_img: http://image.jucaiwy.com/image/20150112/FastDFS.png
+
+cover: http://image.jucaiwy.com/image/20150112/FastDFS.png
+
+---
+
+FastDFS是一款开源的轻量级分布式文件系统纯C实现，支持Linux、FreeBSD等UNIX系统类google FS，不是通用的文件系统，只能通过专有API访问，目前提供了C、Java和PHP API为互联网应用量身定做，解决大容量文件存储问题，追求高性能和高扩展性FastDFS可以看做是基于文件的key value pair存储系统，称作分布式文件存储服务更为合适。最近在做柬埔寨一个IM项目，需要对图片、视频、录音等文件进行存储，这里选择使用FastDFS进行存储，记录了一下搭建过程，以备后期查阅。
+
+### 1.准备工作
+
+首先我们看一下FastDFS的三方交互图：
+
+![](http://image.jucaiwy.com/image/20150112/FastDFS.png)
+
+
+以下为我配置时使用的机器信息
+
+- 系统：CentOS 5.7 32位
+- Libevent：libevent-2.0.16-stable.tar.gz
+- FastDFS：FastDFS_v3.06.tar.gz
+- Male：yum -y install make
+
+### 2.安装Libevent
+
+按照以下步骤进行安装和配置
+
+#### 2.1 解压libevent-2.0.16-stable.tar.gz：
+```bash
+tar -zxvf  libevent-2.0.16-stable.tar.gz
+```
+#### 2.2 新建目录libevent：
+
+用于放置libevent编译出来的文件
+
+#### 2.3 配置：在libevent-2.0.16-stable目录中执行：
+
+```bash
+./configure --prefix=/usr/xinwei/libevent
+```
+
+**注：/usr/xinwei/libevent目录需要新建，不能设置libevent-2.0.16-stable目录，否则上传时会出错**
+
+#### 2.4 Make：
+```bash
+cd libevent-2.0.16-stable/  然后执行：make
+```
+
+#### 2.5 安装：
+```bash
+make install
+```
+
+执行完毕后再之前新建的libevent目录中会生成bin、include和lib三个目录
+
+### 3.安装FastDFS
+
+#### 3.1 解压FastDFS_v3.06.tar.gz：
+```bash
+tar -zxvf  FastDFS_v3.06.tar.gz
+```
+#### 3.2 配置1：
+
+```bash
+vi make.sh
+```
+修改：
+
+```
+TARGET_PREFIX=/usr/local
+TARGET_CONF_PATH=/etc/fdfs
+WITH_HTTPD=1	
+WITH_LINUX_SERVICE=1
+保存后退出
+```
+
+#### 3.2 配置2：配置include的路径和lib的路径。均为之前新建目录libevent中的include和lib
+
+```bash
+./make.sh C_INCLUDE_PATH=/usr/xinwei/libevent/include LIBRARY_PATH=/usr/xinwei/libevent/lib
+```
+
+#### 3.3 Make：执行FastDFS目录中的make.sh文件  
+
+安装：
+
+```bash
+cd FastDFS
+./make.sh install
+```
+
+安装完成后在/etc/fdfs/目录中会生成配置文件，包含client.conf、http.conf、mime.types、storage.conf、tracker.conf 
+
+### 4.配置
+需要对/etc/fdfs/目录中的client.conf、storage.conf、tracker.conf 进行配置
+
+#### 4.1 Client.conf：
+	
+```bash
+base_path=/home/xinwei/fastdfs
+tracker_server=192.168.113.234:22122
+#include http.conf
+```
+	
+#### 4.2 Storage.conf：
+```bash
+base_path=/home/xinwei/fastdfs
+store_path0=/home/xinwei/fastdfs	
+tracker_server=192.168.113.234:22122
+#include http.conf	
+```
+	
+	
+#### 4.3 Tracker.conf:
+	
+```bash
+#include http.conf
+```
+
+配置完成后可进行启动：
+
+### 5.启动
+
+直接使用以下命令进行启动
+
+```bash
+Service fdfs_storaged start
+Service fdfs_trackerd start
+
+```
+	
+
+### 6.测试
+上传一个文件进行测试：
+
+```bash
+/usr/local/bin/fdfs_test /etc/fdfs/client.conf upload /usr/xinwei/test/test 
+```
+
+### 7.备注
+(1).  FastDFS的log在/home/xinwei/fastdfs/logs目录中
+
+(2).  若出以下错误:
+
+```java
+[2015-01-03 23:19:52] ERROR - file: ../common/fdfs_http_shared.c, line: 128, param "http.mime_types_filename" not exist or is empty
+```
+
+则配置**http.conf**文件中：
+
+```
+http.mime_types_filename=/etc/fdfs/mime.types
+```
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 

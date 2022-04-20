@@ -1,0 +1,89 @@
+---
+
+title: HEIF图片存储格式探秘
+
+date: 2017-12-11 18:30:43
+
+tags: [ Android , IJKPlayer , IOS11图片格式 , 图片存储]
+
+categories: [Android , HEIF ]
+
+keywords: HEIF , IOS11图片格式 , 图片存储
+
+description: HEIF图片存储格式探秘
+
+top_img: http://image.jucaiwy.com/image/20161211/heif_image.jpg
+
+cover: http://image.jucaiwy.com/image/20161211/heif_image.jpg
+
+---
+
+
+
+HEIF，High Efficiency Image File Format，即高效率图档格式，是由动态图像专家组（MPEG--Moving Picture Experts Group ）在2013年推出的存储图片和图片序列的新格式，用于HEVC关键帧的处理上，因此它同样可以用更少的容量来存储画质更好的照片，在连拍、动图和色彩变化不大的照片上效果尤其明显。
+
+官网：[http://nokiatech.github.io/heif/](http://nokiatech.github.io/heif/)
+
+比较：[http://nokiatech.github.io/heif/comparison.html](http://nokiatech.github.io/heif/comparison.html)
+
+
+GitHub地址：[https://github.com/nokiatech/heif](https://github.com/nokiatech/heif)
+
+
+在git的wiki上有说明如何进行编译，需要再linux中进行编译，今天安装了linux系统，然后，准备编译一下。
+
+
+### 1. 编译构建
+
+从GitHub上下载了Nokia的代码，语言不通，几乎看不懂，但是，从wiki上看到了如何进行编译和构建，于是决定试试。
+
+
+在Linux环境下，打开命令行模式，输入命令进行下载：
+
+![](http://image.jucaiwy.com/image/20161211/I9eaox5.png)
+
+下载完成后，可以看到目录结构如下：
+
+![](http://image.jucaiwy.com/image/20161211/HH0eXqI.png)
+
+然后，进入heif目录，新建文件夹，命名为build，然后进入build，执行cmake .. 
+
+![](http://image.jucaiwy.com/image/20161211/IpuSeOp.png)
+
+然后执行make：
+
+![](http://image.jucaiwy.com/image/20161211/4R9eq3Y.png)
+
+生成了可执行的writerapp的执行文件，但是现在还不知道怎么执行。
+
+### 2. 转换工具：
+
+[HEIF Utility](https://liuziangexit.com/HEIF-Utility/)
+
+这个转换工具，今天测试了以下，不是很好用。
+
+### 3. Android项目Demo
+
+[https://github.com/yohhoy/heifreader](https://github.com/yohhoy/heifreader)
+
+这个项目使用了 [sannies/mp4parser ](https://github.com/sannies/mp4parser)这个库解析HEIF结构。目前为止存在bug，没有解决，可能是因为当前技术不完善吧
+
+
+### 4. 各种不支持
+
+Windows不支持，PhotoShopCC不支持，低版本的iPhone、Mac均不支持该格式，微信，微博等均不支持（测试了Android版本的）
+
+### 5. 在线的HEIF图片地址：
+
+这里找到了一些在线的图片地址，heic格式的，是诺基亚官方提供的，以后研究的时候可以使用
+
+在线地址：[https://github.com/nokiatech/heif/tree/gh-pages/content/images](https://github.com/nokiatech/heif/tree/gh-pages/content/images)
+
+
+### 6. 没有快速推广的原因：
+
+1. 专利费，齁贵，各大厂硬件厂商用不起
+2. 格式暂时未通用，各大软件服务商，暂时没有支持，表现在Windows也无法产生这种文档的图示，而且Photoshop也不支持该格式的图片编辑，目前仅苹果支持。
+
+
+
