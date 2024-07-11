@@ -1,14 +1,14 @@
----	
+---
 
-title: HarmonyOS开发—基础—基础组件
+title: HarmonyOS开发—基础-基础组件
 
-date: 2024-01-29 19:32:46
+date: 2023-12-22 14:54:46
 
-tags: [HarmonyOS开发,基础组件]
+tags: [HarmonyOS开发 , 基础组件]
 
 categories: HarmonyOS
 
-keywords: HarmonyOS,HarmonyOS开发,HarmonyOS入门,基础组件
+keywords: HarmonyOS , HarmonyOS开发 , HarmonyOS入门 , 基础组件
 
 description: 基础组件
 
